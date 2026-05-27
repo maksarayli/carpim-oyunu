@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Çarpım Tablosu Oyunu</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #1a1a2e;
+  --card: #16213e;
+  --primary: #e94560;
+  --secondary: #0f3460;
+  --accent: #f5c518;
+  --success: #00c851;
+  --danger: #ff4444;
+  --text: #ffffff;
+  --text-muted: #a0a0b0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  animation: fadeIn 0.4s ease;
+}
+
+.screen.active {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== ANA EKRAN ===== */
+.logo { font-size: 3.5rem; margin-bottom: 10px; animation: bounce 2s infinite; }
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+h1 { font-size: 1.8rem; margin-bottom: 8px; text-align: center; }
+.subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 30px; }
+
+.difficulty-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.diff-btn {
+  border: none;
+  border-radius: 16px;
+  padding: 18px 24px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.diff-btn:active { transform: scale(0.95); }
+
+.diff-btn.easy { background: linear-gradient(135deg, #00b09b, #96c93d); }
+.diff-btn.medium { background: linear-gradient(135deg, #f7971e, #ffd200); color: #333; }
+.diff-btn.hard { background: linear-gradient(135deg, #e94560, #c62a71); }
+
+.diff-btn .emoji { font-size: 1.6rem; }
+.diff-btn .info { font-size: 0.8rem; font-weight: 400; opacity: 0.85; }
+
+.high-scores-btn {
+  margin-top: 24px;
+  background: none;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.high-scores-btn:active { background: var(--accent); color: #333; }
+
+/* ===== OYUN EKRANI ===== */
+.game-header {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.game-stat {
+  text-align: center;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 10px 16px;
+  min-width: 70px;
+}
+
+.game-stat .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+.game-stat .value { font-size: 1.3rem; font-weight: 700; }
+.game-stat .value.score-val { color: var(--accent); }
+.game-stat .value.timer-val { color: var(--primary); }
+
+.progress-bar {
+  width: 100%;
+  max-width: 400px;
+  height: 8px;
+  background: var(--card);
+  border-radius: 4px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.question-card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.question-emoji { font-size: 2.5rem; margin-bottom: 12px; }
+
+.question-text {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.question-text .operator { color: var(--primary); margin: 0 6px; }
+.question-text .equals { color: var(--accent); margin-left: 6px; }
+
+.options-grid {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.options-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.options-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.options-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+
+.option-btn {
+  border: 3px solid var(--secondary);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 20px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.option-btn:active { transform: scale(0.93); }
+
+.option-btn.correct {
+  border-color: var(--success);
+  background: rgba(0, 200, 81, 0.2);
+  animation: pulse 0.4s;
+}
+
+.option-btn.wrong {
+  border-color: var(--danger);
+  background: rgba(255, 68, 68, 0.2);
+  animation: shake 0.4s;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.feedback-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.feedback-overlay.show { display: flex; }
+
+.feedback-icon {
+  font-size: 6rem;
+  animation: popIn 0.5s ease;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== SONUÇ EKRANI ===== */
+.result-card {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 32px 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.result-emoji { font-size: 4rem; margin-bottom: 12px; }
+.result-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+.result-subtitle { color: var(--text-muted); margin-bottom: 20px; }
+
+.stars { font-size: 2.5rem; margin-bottom: 20px; letter-spacing: 6px; }
+
+.result-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.result-stat {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 12px 8px;
+}
+
+.result-stat .num { font-size: 1.5rem; font-weight: 700; }
+.result-stat .lbl { font-size: 0.7rem; color: var(--text-muted); }
+
+.result-stat .num.green { color: var(--success); }
+.result-stat .num.red { color: var(--danger); }
+.result-stat .num.gold { color: var(--accent); }
+
+.new-record { color: var(--accent); font-weight: 700; font-size: 1.1rem; margin-bottom: 16px; animation: pulse 1s infinite; }
+
+.result-actions { display: flex; flex-direction: column; gap: 10px; }
+
+.action-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.action-btn:active { transform: scale(0.95); }
+.action-btn.primary { background: var(--primary); color: #fff; }
+.action-btn.secondary { background: var(--secondary); color: #fff; }
+
+/* ===== SKOR TABLOSU ===== */
+.scores-card {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 28px 20px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.scores-card h2 { text-align: center; margin-bottom: 20px; font-size: 1.4rem; }
+
+.score-section { margin-bottom: 18px; }
+.score-section h3 { font-size: 1rem; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.score-section h3.easy-title { color: #96c93d; }
+.score-section h3.medium-title { color: #ffd200; }
+.score-section h3.hard-title { color: #e94560; }
+
+.score-list { list-style: none; }
+.score-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.9rem;
+}
+.score-list li .rank { color: var(--text-muted); width: 24px; }
+.score-list li .pts { color: var(--accent); font-weight: 700; }
+.no-score { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+
+.back-btn {
+  margin-top: 20px;
+  background: var(--secondary);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 32px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===== KONFETİ ===== */
+.confetti-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  top: -10px;
+  animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+  to { top: 110vh; transform: rotate(720deg); }
+}
+
+/* ===== TIMER CIRCLE ===== */
+.timer-ring {
+  width: 56px;
+  height: 56px;
+  position: relative;
+}
+
+.timer-ring svg {
+  transform: rotate(-90deg);
+  width: 56px;
+  height: 56px;
+}
+
+.timer-ring circle {
+  fill: none;
+  stroke-width: 4;
+  cx: 28;
+  cy: 28;
+  r: 24;
+}
+
+.timer-ring .bg { stroke: var(--secondary); }
+.timer-ring .fg {
+  stroke: var(--primary);
+  stroke-dasharray: 150.8;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.timer-ring .time-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.timer-ring.warning .fg { stroke: var(--danger); }
+.timer-ring.warning .time-text { color: var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- ANA EKRAN -->
+<div id="home-screen" class="screen active">
+  <div class="logo">🧮</div>
+  <h1>Çarpım Tablosu</h1>
+  <p class="subtitle">Eğlenerek öğren!</p>
+  <div class="difficulty-grid">
+    <button class="diff-btn easy" onclick="startGame('easy')">
+      <span class="emoji">🌟</span>
+      <span>Kolay<br><span class="info">2 seçenek • 15 saniye</span></span>
+    </button>
+    <button class="diff-btn medium" onclick="startGame('medium')">
+      <span class="emoji">🔥</span>
+      <span>Orta<br><span class="info">3 seçenek • 12 saniye</span></span>
+    </button>
+    <button class="diff-btn hard" onclick="startGame('hard')">
+      <span class="emoji">💪</span>
+      <span>Zor<br><span class="info">4 seçenek • 10 saniye</span></span>
+    </button>
+  </div>
+  <button class="high-scores-btn" onclick="showScores()">🏆 En Yüksek Puanlar</button>
+</div>
+
+<!-- OYUN EKRANI -->
+<div id="game-screen" class="screen">
+  <div class="game-header">
+    <div class="game-stat">
+      <div class="label">Soru</div>
+      <div class="value" id="question-num">1/10</div>
+    </div>
+    <div class="timer-ring" id="timer-ring">
+      <svg><circle class="bg"/><circle class="fg" id="timer-circle"/></svg>
+      <div class="time-text" id="timer-text">15</div>
+    </div>
+    <div class="game-stat">
+      <div class="label">Puan</div>
+      <div class="value score-val" id="current-score">0</div>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-emoji" id="q-emoji">🤔</div>
+    <div class="question-text">
+      <span id="num1">3</span>
+      <span class="operator">×</span>
+      <span id="num2">7</span>
+      <span class="equals">=</span>
+      <span>?</span>
+    </div>
+  </div>
+
+  <div class="options-grid" id="options-grid"></div>
+</div>
+
+<!-- GERİ BİLDİRİM -->
+<div class="feedback-overlay" id="feedback-overlay">
+  <div class="feedback-icon" id="feedback-icon"></div>
+</div>
+
+<!-- SONUÇ EKRANI -->
+<div id="result-screen" class="screen">
+  <div class="result-card">
+    <div class="result-emoji" id="result-emoji">🎉</div>
+    <div class="result-title" id="result-title">Harika!</div>
+    <div class="result-subtitle" id="result-subtitle">Çok iyi gidiyorsun!</div>
+    <div class="stars" id="result-stars">⭐⭐⭐</div>
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="num green" id="stat-correct">8</div>
+        <div class="lbl">Doğru</div>
+      </div>
+      <div class="result-stat">
+        <div class="num red" id="stat-wrong">2</div>
+        <div class="lbl">Yanlış</div>
+      </div>
+      <div class="result-stat">
+        <div class="num gold" id="stat-score">80</div>
+        <div class="lbl">Puan</div>
+      </div>
+    </div>
+    <div class="new-record" id="new-record" style="display:none">🏆 Yeni Rekor!</div>
+    <div class="result-actions">
+      <button class="action-btn primary" id="retry-btn">Tekrar Oyna</button>
+      <button class="action-btn secondary" onclick="showScreen('home-screen')">Ana Menü</button>
+    </div>
+  </div>
+</div>
+
+<!-- SKOR TABLOSU -->
+<div id="scores-screen" class="screen">
+  <div class="scores-card">
+    <h2>🏆 En Yüksek Puanlar</h2>
+    <div class="score-section">
+      <h3 class="easy-title">🌟 Kolay</h3>
+      <ul class="score-list" id="scores-easy"></ul>
+    </div>
+    <div class="score-section">
+      <h3 class="medium-title">🔥 Orta</h3>
+      <ul class="score-list" id="scores-medium"></ul>
+    </div>
+    <div class="score-section">
+      <h3 class="hard-title">💪 Zor</h3>
+      <ul class="score-list" id="scores-hard"></ul>
+    </div>
+    <button class="back-btn" onclick="showScreen('home-screen')">← Geri</button>
+  </div>
+</div>
+
+<!-- KONFETİ -->
+<div class="confetti-container" id="confetti-container"></div>
+
+<script>
+const SETTINGS = {
+  easy:   { options: 2, time: 15, points: 10, label: 'Kolay' },
+  medium: { options: 3, time: 12, points: 20, label: 'Orta' },
+  hard:   { options: 4, time: 10, points: 30, label: 'Zor' }
+};
+
+const TOTAL_QUESTIONS = 10;
+const EMOJIS = ['🤔','🧐','💭','🎯','✨','🌈','🎪','🎲','🎨','🎵'];
+const CONFETTI_COLORS = ['#e94560','#f5c518','#00c851','#448aff','#ff6d00','#aa00ff','#00bcd4'];
+
+let game = {};
+let timerInterval = null;
+
+// ===== EKRAN YÖNETİMİ =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== OYUN BAŞLAT =====
+function startGame(difficulty) {
+  const s = SETTINGS[difficulty];
+  game = {
+    difficulty,
+    settings: s,
+    current: 0,
+    score: 0,
+    correct: 0,
+    wrong: 0,
+    questions: generateQuestions()
+  };
+  showScreen('game-screen');
+  document.getElementById('options-grid').className =
+    'options-grid cols-' + s.options;
+  showQuestion();
+}
+
+// ===== SORU ÜRETİCİ =====
+function generateQuestions() {
+  const questions = [];
+  const used = new Set();
+  while (questions.length < TOTAL_QUESTIONS) {
+    const a = Math.floor(Math.random() * 10) + 1;
+    const b = Math.floor(Math.random() * 10) + 1;
+    const key = a + 'x' + b;
+    if (!used.has(key)) {
+      used.add(key);
+      questions.push({ a, b, answer: a * b });
+    }
+  }
+  return questions;
+}
+
+// ===== SORUYU GÖSTER =====
+function showQuestion() {
+  const q = game.questions[game.current];
+  const s = game.settings;
+
+  document.getElementById('question-num').textContent =
+    (game.current + 1) + '/' + TOTAL_QUESTIONS;
+  document.getElementById('current-score').textContent = game.score;
+  document.getElementById('progress-fill').style.width =
+    (game.current / TOTAL_QUESTIONS * 100) + '%';
+  document.getElementById('q-emoji').textContent =
+    EMOJIS[game.current % EMOJIS.length];
+  document.getElementById('num1').textContent = q.a;
+  document.getElementById('num2').textContent = q.b;
+
+  // Seçenekler
+  const options = generateOptions(q.answer, s.options);
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  options.forEach(val => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = val;
+    btn.onclick = () => checkAnswer(val, q.answer, btn);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+// ===== SEÇENEK ÜRETİCİ =====
+function generateOptions(correct, count) {
+  const opts = new Set([correct]);
+  while (opts.size < count) {
+    // Yakın değerler üret (daha gerçekçi yanlış cevaplar)
+    let fake;
+    const r = Math.random();
+    if (r < 0.4) {
+      fake = correct + Math.floor(Math.random() * 10) - 5;
+    } else if (r < 0.7) {
+      fake = correct + (Math.random() < 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1);
+    } else {
+      fake = Math.floor(Math.random() * 100) + 1;
+    }
+    if (fake > 0 && fake !== correct && fake <= 100) {
+      opts.add(fake);
+    }
+  }
+  return shuffle([...opts]);
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ===== ZAMANLAYICI =====
+function startTimer() {
+  clearInterval(timerInterval);
+  let timeLeft = game.settings.time;
+  const ring = document.getElementById('timer-ring');
+  const circle = document.getElementById('timer-circle');
+  const text = document.getElementById('timer-text');
+  const circumference = 150.8;
+
+  ring.classList.remove('warning');
+  text.textContent = timeLeft;
+  circle.style.strokeDashoffset = '0';
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    text.textContent = timeLeft;
+    const progress = 1 - (timeLeft / game.settings.time);
+    circle.style.strokeDashoffset = (circumference * progress).toString();
+
+    if (timeLeft <= 3) ring.classList.add('warning');
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timeUp();
+    }
+  }, 1000);
+}
+
+function timeUp() {
+  game.wrong++;
+  const q = game.questions[game.current];
+  // Doğru cevabı göster
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.onclick = null;
+    if (parseInt(btn.textContent) === q.answer) {
+      btn.classList.add('correct');
+    }
+  });
+  showFeedback(false);
+  setTimeout(nextQuestion, 1200);
+}
+
+// ===== CEVAP KONTROL =====
+function checkAnswer(selected, correct, btn) {
+  clearInterval(timerInterval);
+  const isCorrect = selected === correct;
+
+  // Tüm butonları devre dışı bırak
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.onclick = null;
+    if (parseInt(b.textContent) === correct) b.classList.add('correct');
+  });
+
+  if (isCorrect) {
+    game.score += game.settings.points;
+    game.correct++;
+    document.getElementById('current-score').textContent = game.score;
+    miniConfetti();
+  } else {
+    btn.classList.add('wrong');
+    game.wrong++;
+  }
+
+  showFeedback(isCorrect);
+  setTimeout(nextQuestion, 1000);
+}
+
+// ===== GERİ BİLDİRİM =====
+function showFeedback(isCorrect) {
+  const overlay = document.getElementById('feedback-overlay');
+  const icon = document.getElementById('feedback-icon');
+  icon.textContent = isCorrect ? '✅' : '❌';
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 800);
+}
+
+// ===== SONRAKİ SORU =====
+function nextQuestion() {
+  game.current++;
+  if (game.current >= TOTAL_QUESTIONS) {
+    endGame();
+  } else {
+    showQuestion();
+  }
+}
+
+// ===== OYUN BİTİŞ =====
+function endGame() {
+  clearInterval(timerInterval);
+  const pct = game.correct / TOTAL_QUESTIONS;
+  let emoji, title, subtitle, starCount;
+
+  if (pct === 1) {
+    emoji = '🏆'; title = 'MÜKEMMEL!'; subtitle = 'Hepsini bildin!'; starCount = 5;
+  } else if (pct >= 0.8) {
+    emoji = '🎉'; title = 'Harika!'; subtitle = 'Çok iyi gidiyorsun!'; starCount = 4;
+  } else if (pct >= 0.6) {
+    emoji = '😊'; title = 'İyi!'; subtitle = 'Biraz daha pratik yapalım!'; starCount = 3;
+  } else if (pct >= 0.4) {
+    emoji = '💪'; title = 'Devam Et!'; subtitle = 'Her seferinde daha iyi olacaksın!'; starCount = 2;
+  } else {
+    emoji = '🌟'; title = 'Başlangıç!'; subtitle = 'Pratik yapmaya devam et!'; starCount = 1;
+  }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-subtitle').textContent = subtitle;
+  document.getElementById('result-stars').textContent = '⭐'.repeat(starCount) + '☆'.repeat(5 - starCount);
+  document.getElementById('stat-correct').textContent = game.correct;
+  document.getElementById('stat-wrong').textContent = game.wrong;
+  document.getElementById('stat-score').textContent = game.score;
+
+  // Skor kaydet
+  const isNewRecord = saveScore(game.difficulty, game.score);
+  document.getElementById('new-record').style.display = isNewRecord ? 'block' : 'none';
+
+  // Tekrar oyna butonu
+  document.getElementById('retry-btn').onclick = () => startGame(game.difficulty);
+
+  showScreen('result-screen');
+
+  if (pct >= 0.8) bigConfetti();
+}
+
+// ===== SKOR SİSTEMİ =====
+function getScores() {
+  try {
+    return JSON.parse(localStorage.getItem('carpim_scores')) || { easy: [], medium: [], hard: [] };
+  } catch { return { easy: [], medium: [], hard: [] }; }
+}
+
+function saveScore(difficulty, score) {
+  const scores = getScores();
+  const list = scores[difficulty];
+  const isRecord = list.length === 0 || score > Math.max(...list.map(s => s.score));
+  list.push({ score, date: new Date().toLocaleDateString('tr-TR') });
+  list.sort((a, b) => b.score - a.score);
+  scores[difficulty] = list.slice(0, 5);
+  localStorage.setItem('carpim_scores', JSON.stringify(scores));
+  return isRecord && score > 0;
+}
+
+function showScores() {
+  const scores = getScores();
+  ['easy', 'medium', 'hard'].forEach(diff => {
+    const ul = document.getElementById('scores-' + diff);
+    const list = scores[diff];
+    if (list.length === 0) {
+      ul.innerHTML = '<li class="no-score">Henüz skor yok</li>';
+    } else {
+      ul.innerHTML = list.map((s, i) =>
+        '<li><span class="rank">' + (i + 1) + '.</span><span>' + s.date +
+        '</span><span class="pts">' + s.score + ' puan</span></li>'
+      ).join('');
+    }
+  });
+  showScreen('scores-screen');
+}
+
+// ===== KONFETİ =====
+function miniConfetti() {
+  spawnConfetti(15);
+}
+
+function bigConfetti() {
+  spawnConfetti(60);
+  setTimeout(() => spawnConfetti(40), 300);
+  setTimeout(() => spawnConfetti(30), 600);
+}
+
+function spawnConfetti(count) {
+  const container = document.getElementById('confetti-container');
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = Math.random() * 100 + '%';
+    el.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    el.style.width = (Math.random() * 8 + 6) + 'px';
+    el.style.height = (Math.random() * 8 + 6) + 'px';
+    el.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+    el.style.animationDelay = (Math.random() * 0.5) + 's';
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+}
+</script>
+
+</body>
+</html>
