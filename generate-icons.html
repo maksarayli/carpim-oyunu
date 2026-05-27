@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="c" width="512" height="512"></canvas>
+<script>
+function drawIcon(size) {
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+
+  // Rounded rect background with gradient
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, '#667eea');
+  grad.addColorStop(1, '#e94560');
+  roundRect(ctx, 0, 0, size, size, size * 0.2, grad);
+
+  // Inner glow circle
+  const cg = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size*0.4);
+  cg.addColorStop(0, 'rgba(255,255,255,0.15)');
+  cg.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = cg;
+  ctx.beginPath();
+  ctx.arc(size/2, size*0.42, size*0.35, 0, Math.PI*2);
+  ctx.fill();
+
+  // Big emoji
+  ctx.font = (size * 0.38) + 'px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🧮', size/2, size*0.35);
+
+  // "3×7=?" text
+  ctx.font = 'bold ' + (size * 0.14) + 'px "Segoe UI", Arial, sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('3 × 7 = ?', size/2, size*0.65);
+
+  // Stars at bottom
+  ctx.font = (size * 0.07) + 'px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+  ctx.fillText('⭐⭐⭐', size/2, size*0.83);
+
+  return c;
+}
+
+function roundRect(ctx, x, y, w, h, r, fill) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+
+// Draw and show download links
+[192, 512].forEach(size => {
+  const canvas = drawIcon(size);
+  const link = document.createElement('a');
+  link.download = 'icon-' + size + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.textContent = 'Download icon-' + size + '.png';
+  link.style.display = 'block';
+  link.style.margin = '10px';
+  link.style.fontSize = '20px';
+  document.body.appendChild(link);
+
+  // Also show preview
+  canvas.style.border = '1px solid #ccc';
+  canvas.style.margin = '10px';
+  canvas.style.width = '128px';
+  document.body.appendChild(canvas);
+});
+</script>
+</body>
+</html>

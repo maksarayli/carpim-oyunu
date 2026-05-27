@@ -1,1 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192"><rect width="192" height="192" rx="28.799999999999997" fill="#1a1a2e"/><circle cx="96" cy="96" r="72.96000000000001" fill="#e94560"/><text x="96" y="107.52000000000001" text-anchor="middle" font-size="76.80000000000001" font-weight="bold" fill="white" font-family="Arial">x</text><text x="96" y="157.44" text-anchor="middle" font-size="19.200000000000003" font-weight="bold" fill="#f5c518" font-family="Arial">CARPIM</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#e94560"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.25)"/>
+      <stop offset="50%" style="stop-color:rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" rx="42" fill="url(#bg)"/>
+  <rect width="192" height="96" rx="42" fill="url(#shine)"/>
+
+  <!-- Abacus frame -->
+  <rect x="32" y="24" width="128" height="96" rx="10" fill="rgba(0,0,0,0.25)"/>
+  <rect x="34" y="26" width="124" height="92" rx="8" fill="none" stroke="#fff" stroke-width="3"/>
+
+  <!-- Rod 1 + beads -->
+  <line x1="34" y1="50" x2="158" y2="50" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <circle cx="58" cy="50" r="9" fill="#f5c518"/><circle cx="80" cy="50" r="9" fill="#f5c518"/>
+  <circle cx="102" cy="50" r="9" fill="#00c851"/><circle cx="124" cy="50" r="9" fill="#00c851"/>
+
+  <!-- Rod 2 + beads -->
+  <line x1="34" y1="76" x2="158" y2="76" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <circle cx="64" cy="76" r="9" fill="#448aff"/><circle cx="86" cy="76" r="9" fill="#ff6d00"/>
+  <circle cx="108" cy="76" r="9" fill="#ff6d00"/>
+
+  <!-- Rod 3 + beads -->
+  <line x1="34" y1="102" x2="158" y2="102" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <circle cx="54" cy="102" r="9" fill="#aa00ff"/><circle cx="76" cy="102" r="9" fill="#00bcd4"/>
+  <circle cx="98" cy="102" r="9" fill="#00bcd4"/><circle cx="120" cy="102" r="9" fill="#aa00ff"/>
+  <circle cx="142" cy="102" r="9" fill="#00bcd4"/>
+
+  <!-- Question text -->
+  <text x="96" y="148" text-anchor="middle" font-size="28" font-weight="800" fill="#fff" font-family="Arial,sans-serif">3 × 7 = ?</text>
+
+  <!-- Stars -->
+  <polygon points="52,174 54.5,168 60,168 55.5,164 57.5,158 52,161.5 46.5,158 48.5,164 44,168 49.5,168" fill="#f5c518"/>
+  <polygon points="96,174 98.5,168 104,168 99.5,164 101.5,158 96,161.5 90.5,158 92.5,164 88,168 93.5,168" fill="#f5c518"/>
+  <polygon points="140,174 142.5,168 148,168 143.5,164 145.5,158 140,161.5 134.5,158 136.5,164 132,168 137.5,168" fill="#f5c518"/>
+</svg>
